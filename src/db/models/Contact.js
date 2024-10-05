@@ -34,6 +34,9 @@ const contactSchema = new Schema(
       ref: 'User',
       required: true,
     },
+    photo: {
+      type: String,
+    },
     // createdAt: {
     //   type: String,
     //   required: true,
@@ -43,6 +46,7 @@ const contactSchema = new Schema(
     //   required: true,
     // },
   },
+
   { versionKey: false, timestamps: true },
 );
 export const sortFields = [
