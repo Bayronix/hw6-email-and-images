@@ -1,5 +1,6 @@
 import ContactCollection from '../db/models/Contact.js';
 import { calculatePaginationData } from '../utils/calculatePaginationData.js';
+import createHttpError from 'http-errors';
 
 export const getAllContacts = async ({
   page = 1,
@@ -27,11 +28,33 @@ export const getAllContacts = async ({
   };
 };
 
-export const getContactById = async (id) => {
-  const contacts = await ContactCollection.findById(id);
-  return contacts;
+export const getContactById = async (contactId, userId) => {
+  const contact = await ContactCollection.findOne({
+    _id: contactId,
+    userId,
+  });
+  console.log('Fetched Contact:', contact);
+  return contact;
 };
-export const getCreateContact = (payload) => ContactCollection.create(payload);
+
+export const getCreateContact = async (payload) => {
+  const { phoneNumber, email, userId } = payload;
+
+  const existingContact = await ContactCollection.findOne({
+    userId,
+    $or: [{ phoneNumber }, { email }],
+  });
+
+  if (existingContact) {
+    throw createHttpError(
+      409,
+      'Contact with this phone number or email already exists',
+    );
+  }
+
+  const contact = await ContactCollection.create(payload);
+  return contact;
+};
 
 export const updateContact = async (filter, data, options = {}) => {
   const rawResult = await ContactCollection.findOneAndUpdate(filter, data, {
@@ -48,4 +71,7 @@ export const updateContact = async (filter, data, options = {}) => {
   };
 };
 
-export const getDeleteContact = (id) => ContactCollection.findOneAndDelete(id);
+export const getDeleteContact = async (filter) => {
+  const contact = await ContactCollection.findOneAndDelete(filter);
+  return contact;
+};
