@@ -38,17 +38,16 @@ export const getContactById = async (contactId, userId) => {
 };
 
 export const getCreateContact = async (payload) => {
-  const { phoneNumber, email, userId } = payload;
+  const { name } = payload;
 
   const existingContact = await ContactCollection.findOne({
-    userId,
-    $or: [{ phoneNumber }, { email }],
+    $or: [{ name }],
   });
 
   if (existingContact) {
     throw createHttpError(
       409,
-      'Contact with this phone number or email already exists',
+      'Contact with this phone name or phoneNumber email already exists',
     );
   }
 
